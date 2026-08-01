@@ -2,6 +2,11 @@ spring:
   config:
     import: optional:classpath:products.yaml
 
+app:
+  scheduler:
+    initial-delay-ms: 30000
+    fixed-delay-ms: 60000
+
 telegram:
   bot-token: test-token-not-real
   owner-chat-id: 123456789
