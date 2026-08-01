@@ -1,0 +1,16 @@
+# Products to track and pincodes to check them against.
+# Per-product "pincodes" is optional - omit it to use the global list below.
+app:
+  tracking:
+    pincodes:
+      - "400049"
+      - "110001"
+
+    products:
+      - site: croma
+        itemId: "317577"
+        name: "iPhone 17e 512GB Black"
+
+      - site: croma
+        itemId: "317415"
+        name: "iPhone 16 128GB"

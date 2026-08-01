@@ -3,7 +3,9 @@ spring:
     name: inventory-signal
 
   config:
-    import: optional:file:.env[.properties]
+    import:
+      - optional:file:.env[.properties]
+      - optional:classpath:products.yaml
 
 telegram:
   bot-token: ${BOT_TOKEN}
