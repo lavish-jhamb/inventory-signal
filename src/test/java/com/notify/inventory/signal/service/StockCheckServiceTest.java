@@ -55,4 +55,53 @@ class StockCheckServiceTest {
 
 		service.checkAll();
 	}
+
+	@Test
+	void usesPerProductPincodesInsteadOfGlobalListWhenPresent() {
+		TrackedProduct productWithOverride =
+				new TrackedProduct("croma", "317577", "iPhone 17e", List.of("560001", "600001"));
+		TrackingProperties properties =
+				new TrackingProperties(List.of("400049"), List.of(productWithOverride));
+
+		List<String> checkedPincodes = new ArrayList<>();
+		StockProvider fakeProvider = new StockProvider() {
+			@Override
+			public String siteName() {
+				return "croma";
+			}
+
+			@Override
+			public StockCheckResult checkAvailability(TrackedProduct product, String pincode) {
+				checkedPincodes.add(pincode);
+				return new StockCheckResult(product, pincode, false, "detail");
+			}
+		};
+
+		StockCheckService service = new StockCheckService(properties, List.of(fakeProvider), result -> { });
+		service.checkAll();
+
+		assertThat(checkedPincodes).containsExactly("560001", "600001");
+	}
+
+	@Test
+	void aFailingCheckDoesNotStopOtherChecksOrNotify() {
+		List<StockCheckResult> notified = new ArrayList<>();
+		StockProvider throwingProvider = new StockProvider() {
+			@Override
+			public String siteName() {
+				return "croma";
+			}
+
+			@Override
+			public StockCheckResult checkAvailability(TrackedProduct product, String pincode) {
+				throw new RuntimeException("simulated network failure");
+			}
+		};
+
+		StockCheckService service = new StockCheckService(PROPERTIES, List.of(throwingProvider), notified::add);
+
+		service.checkAll();
+
+		assertThat(notified).isEmpty();
+	}
 }
