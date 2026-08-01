@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+  flyway:
+    enabled: true
+
+telegram:
+  bot-token: test-token-not-real
+  owner-chat-id: 123456789
+  polling-timeout-seconds: 1

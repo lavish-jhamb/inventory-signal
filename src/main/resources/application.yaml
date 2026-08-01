@@ -1,0 +1,54 @@
+spring:
+  application:
+    name: inventory-signal
+
+  config:
+    import: optional:file:.env[.properties]
+
+  datasource:
+    url: ${DB_URL:jdbc:h2:file:./data/inventory-signal}
+    username: ${DB_USERNAME:sa}
+    password: ${DB_PASSWORD:}
+    driver-class-name: org.h2.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    open-in-view: false
+
+  flyway:
+    enabled: false
+
+  h2:
+    console:
+      enabled: true   # set to false before deploying to production / cloud
+      path: /h2-console
+
+telegram:
+  bot-token: ${BOT_TOKEN}
+  owner-chat-id: ${OWNER_CHAT_ID}
+  polling-timeout-seconds: 30
+  api-base-url: https://api.telegram.org
+
+app:
+  scheduler:
+    initial-delay-ms: 30000
+    fixed-delay-ms: 60000
+  connector:
+    base-interval-minutes: 15
+    request-timeout-seconds: 10
+    rate-limit-delay-ms: 8000
+    max-consecutive-fails: 10
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never
+
+server:
+  port: ${PORT:8080}
