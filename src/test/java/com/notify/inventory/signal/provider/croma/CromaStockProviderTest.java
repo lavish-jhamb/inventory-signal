@@ -13,21 +13,32 @@ class CromaStockProviderTest {
 
 	@Test
 	void inStockResponseIsParsedAsAvailable() {
+		// Real shape captured from the live API: nested under promise.suggestedOption.*
 		String responseBody = """
 				{
-				  "promiseLines": {
-				    "promiseLine": [
-				      {
-				        "quantity": "1",
-				        "deliveryDate": "2026-08-03T12:41:32.316+00:00",
-				        "carrierServiceCode": "BlueDart - 7 Day Frieght",
-				        "scac": "BLUE",
-				        "zipCode": "400049",
-				        "shipNode": "CROMA_WH_01"
-				      }
-				    ]
-				  },
-				  "unavailableLines": { "unavailableLine": [] }
+				  "promise": {
+				    "suggestedOption": {
+				      "option": {
+				        "promiseLines": {
+				          "promiseLine": [
+				            {
+				              "itemID": "317577",
+				              "carrierServiceCode": "BlueDart - 7 Day Frieght",
+				              "assignments": {
+				                "assignment": [
+				                  {
+				                    "zipCode": "400049",
+				                    "deliveryDate": "2026-08-03T14:26:57.338+00:00"
+				                  }
+				                ]
+				              }
+				            }
+				          ]
+				        }
+				      },
+				      "unavailableLines": { "unavailableLine": [] }
+				    }
+				  }
 				}
 				""";
 
@@ -41,15 +52,19 @@ class CromaStockProviderTest {
 	void outOfStockResponseIsParsedAsUnavailable() {
 		String responseBody = """
 				{
-				  "promiseLines": { "promiseLine": [] },
-				  "unavailableLines": {
-				    "unavailableLine": [
-				      {
-				        "itemID": "317577",
-				        "lineId": "1",
-				        "unavailableReason": "NOT_ENOUGH_PRODUCT_CHOICES"
+				  "promise": {
+				    "suggestedOption": {
+				      "option": { "promiseLines": { "promiseLine": [] } },
+				      "unavailableLines": {
+				        "unavailableLine": [
+				          {
+				            "itemID": "317577",
+				            "lineId": "1",
+				            "unavailableReason": "NOT_ENOUGH_PRODUCT_CHOICES"
+				          }
+				        ]
 				      }
-				    ]
+				    }
 				  }
 				}
 				""";

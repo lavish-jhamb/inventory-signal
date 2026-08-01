@@ -94,18 +94,20 @@ public class CromaStockProvider implements StockProvider {
 	// package-private so CromaStockProviderTest can exercise it with saved sample responses
 	StockCheckResult parseAvailability(TrackedProduct product, String pincode, String responseBody) {
 		JsonNode root = objectMapper.readTree(responseBody);
+		JsonNode suggestedOption = root.path("promise").path("suggestedOption");
 
-		JsonNode unavailableLines = root.path("unavailableLines").path("unavailableLine");
+		JsonNode unavailableLines = suggestedOption.path("unavailableLines").path("unavailableLine");
 		if (unavailableLines.isArray() && !unavailableLines.isEmpty()) {
 			String reason = unavailableLines.get(0).path("unavailableReason").asString("unknown reason");
 			return new StockCheckResult(product, pincode, false, reason);
 		}
 
-		JsonNode promiseLines = root.path("promiseLines").path("promiseLine");
+		JsonNode promiseLines = suggestedOption.path("option").path("promiseLines").path("promiseLine");
 		if (promiseLines.isArray() && !promiseLines.isEmpty()) {
 			JsonNode line = promiseLines.get(0);
 			String carrier = line.path("carrierServiceCode").asString("");
-			String deliveryDate = line.path("deliveryDate").asString("");
+			JsonNode assignment = line.path("assignments").path("assignment").path(0);
+			String deliveryDate = assignment.path("deliveryDate").asString("");
 			return new StockCheckResult(product, pincode, true, "deliverable via %s, by %s".formatted(carrier, deliveryDate));
 		}
 
