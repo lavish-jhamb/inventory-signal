@@ -47,6 +47,27 @@ app:
 - `pincodes` (top-level) is the default list checked for every product.
 - Each product can optionally set its own `pincodes` list to override the default.
 
+## Debug logging at runtime
+
+Actuator's `loggers` endpoint lets you flip a package to `DEBUG` on a live instance without a
+restart, then flip it back:
+
+```
+# check current level
+curl http://localhost:8080/actuator/loggers/com.notify.inventory.signal
+
+# turn debug on
+curl -X POST http://localhost:8080/actuator/loggers/com.notify.inventory.signal \
+  -H "Content-Type: application/json" -d "{\"configuredLevel\":\"DEBUG\"}"
+
+# turn it back off (falls back to the configured/default level)
+curl -X POST http://localhost:8080/actuator/loggers/com.notify.inventory.signal \
+  -H "Content-Type: application/json" -d "{\"configuredLevel\":null}"
+```
+
+This endpoint is unauthenticated in this MVP — don't expose it publicly without adding auth in
+front of it (e.g. a reverse proxy, Spring Security, or network-level restriction).
+
 ## Project structure
 
 ```
