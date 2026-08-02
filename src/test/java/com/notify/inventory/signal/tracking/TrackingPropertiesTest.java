@@ -21,5 +21,6 @@ class TrackingPropertiesTest {
 		assertThat(iphone17e.site()).isEqualTo("croma");
 		assertThat(iphone17e.itemId()).isEqualTo("317577");
 		assertThat(iphone17e.name()).isEqualTo("iPhone 17e 512GB Black");
+		assertThat(iphone17e.url()).isEqualTo("https://www.croma.com/apple-iphone-17e-512gb-black-/p/317577");
 	}
 }

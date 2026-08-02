@@ -18,7 +18,10 @@ product transitions from out-of-stock to in-stock at a pincode, a message is log
 console, e.g.:
 
 ```
-✅ iPhone 17e 512GB Black is back in stock at pincode 400049 (deliverable via BlueDart - 7 Day Frieght, by 2026-08-03T14:28:44.728+00:00)
+Croma Stock ALERT
+Product : iPhone 17e 512GB Black
+Pincode : 400049
+Buy now : https://www.croma.com/apple-iphone-17e-512gb-black-/p/317577
 ```
 
 ## Configuring products and pincodes
@@ -36,6 +39,7 @@ app:
       - site: croma
         itemId: "317577"          # the numeric code in the product's PDP URL, e.g. /p/317577
         name: "iPhone 17e 512GB Black"
+        url: "https://www.croma.com/apple-iphone-17e-512gb-black-/p/317577"  # shown as the buy link in notifications
         # pincodes:               # optional - overrides the global list above for this product
         #   - "560001"
 ```
