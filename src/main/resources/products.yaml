@@ -10,7 +10,9 @@ app:
       - site: croma
         itemId: "317577"
         name: "iPhone 17e 512GB Black"
+        url: "https://www.croma.com/apple-iphone-17e-512gb-black-/p/317577"
 
       - site: croma
         itemId: "317415"
-        name: "iPhone 16 128GB"
+        name: "iPhone 17 Pro 256GB Silver"
+        url: "https://www.croma.com/apple-iphone-17-pro-256gb-silver-/p/317415"

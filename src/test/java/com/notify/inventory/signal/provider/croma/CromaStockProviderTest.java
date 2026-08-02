@@ -9,7 +9,8 @@ import org.junit.jupiter.api.Test;
 class CromaStockProviderTest {
 
 	private final CromaStockProvider provider = new CromaStockProvider();
-	private final TrackedProduct product = new TrackedProduct("croma", "317577", "iPhone 17e 512GB Black", null);
+	private final TrackedProduct product = new TrackedProduct("croma", "317577", "iPhone 17e 512GB Black",
+			"https://www.croma.com/apple-iphone-17e-512gb-black-/p/317577", null);
 
 	@Test
 	void inStockResponseIsParsedAsAvailable() {

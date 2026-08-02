@@ -15,7 +15,8 @@ import org.junit.jupiter.api.Test;
 
 class StockCheckServiceTest {
 
-	private static final TrackedProduct PRODUCT = new TrackedProduct("croma", "317577", "iPhone 17e", null);
+	private static final TrackedProduct PRODUCT =
+			new TrackedProduct("croma", "317577", "iPhone 17e", "https://www.croma.com/apple-iphone-17e-512gb-black-/p/317577", null);
 	private static final TrackingProperties PROPERTIES =
 			new TrackingProperties(List.of("400049"), List.of(PRODUCT));
 
@@ -58,8 +59,8 @@ class StockCheckServiceTest {
 
 	@Test
 	void usesPerProductPincodesInsteadOfGlobalListWhenPresent() {
-		TrackedProduct productWithOverride =
-				new TrackedProduct("croma", "317577", "iPhone 17e", List.of("560001", "600001"));
+		TrackedProduct productWithOverride = new TrackedProduct("croma", "317577", "iPhone 17e",
+				"https://www.croma.com/apple-iphone-17e-512gb-black-/p/317577", List.of("560001", "600001"));
 		TrackingProperties properties =
 				new TrackingProperties(List.of("400049"), List.of(productWithOverride));
 

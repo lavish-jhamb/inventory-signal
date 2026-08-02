@@ -1,6 +1,7 @@
 package com.notify.inventory.signal.notification;
 
 import com.notify.inventory.signal.provider.StockCheckResult;
+import com.notify.inventory.signal.tracking.TrackedProduct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -13,7 +14,15 @@ public class ConsoleNotifier implements Notifier {
 
 	@Override
 	public void notify(StockCheckResult result) {
-		log.info("✅ {} is back in stock at pincode {} ({})",
-				result.product().name(), result.pincode(), result.detail());
+		TrackedProduct product = result.product();
+		String siteLabel = product.site().substring(0, 1).toUpperCase() + product.site().substring(1);
+
+		log.info("""
+
+				{} Stock ALERT
+				Product : {}
+				Pincode : {}
+				Buy now : {}""",
+				siteLabel, product.name(), result.pincode(), product.url());
 	}
 }
