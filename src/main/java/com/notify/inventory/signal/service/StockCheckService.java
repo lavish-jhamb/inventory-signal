@@ -22,15 +22,15 @@ public class StockCheckService {
 
 	private final TrackingProperties trackingProperties;
 	private final Map<String, StockProvider> providersBySite;
-	private final Notifier notifier;
+	private final List<Notifier> notifiers;
 
 	// key = site:itemId:pincode -> last known availability
 	private final Map<String, Boolean> lastKnownAvailability = new ConcurrentHashMap<>();
 
-	public StockCheckService(TrackingProperties trackingProperties, List<StockProvider> providers, Notifier notifier) {
+	public StockCheckService(TrackingProperties trackingProperties, List<StockProvider> providers, List<Notifier> notifiers) {
 		this.trackingProperties = trackingProperties;
 		this.providersBySite = providers.stream().collect(Collectors.toMap(StockProvider::siteName, p -> p));
-		this.notifier = notifier;
+		this.notifiers = notifiers;
 	}
 
 	@Scheduled(initialDelayString = "${app.scheduler.initial-delay-ms}", fixedDelayString = "${app.scheduler.fixed-delay-ms}")
@@ -66,7 +66,13 @@ public class StockCheckService {
 
 		boolean justBecameAvailable = result.available() && !Boolean.TRUE.equals(wasAvailable);
 		if (justBecameAvailable) {
-			notifier.notify(result);
+			for (Notifier notifier : notifiers) {
+				try {
+					notifier.notify(result);
+				} catch (Exception e) {
+					log.error("Notifier {} failed: {}", notifier.getClass().getSimpleName(), e.getMessage());
+				}
+			}
 		}
 	}
 }

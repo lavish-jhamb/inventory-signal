@@ -68,6 +68,24 @@ curl -X POST http://localhost:8080/actuator/loggers/com.notify.inventory.signal 
 This endpoint is unauthenticated in this MVP — don't expose it publicly without adding auth in
 front of it (e.g. a reverse proxy, Spring Security, or network-level restriction).
 
+## Telegram notifications
+
+In addition to the console log, stock alerts are also sent to a Telegram chat via
+`TelegramNotifier`. Configure it with two env vars (loaded from an optional `.env` file, see
+`spring.config.import` in [application.yaml](src/main/resources/application.yaml)):
+
+```
+BOT_TOKEN=123456:your-bot-token-from-BotFather
+OWNER_CHAT_ID=123456789
+```
+
+- `BOT_TOKEN` — create a bot via [@BotFather](https://t.me/BotFather) and copy its token.
+- `OWNER_CHAT_ID` — your Telegram user/chat ID to receive the alerts (e.g. from
+  [@userinfobot](https://t.me/userinfobot)).
+
+Both notifiers run independently — if Telegram is unreachable or misconfigured, the console
+notification still fires (and vice versa).
+
 ## Project structure
 
 ```
@@ -76,7 +94,8 @@ com.notify.inventory.signal
 ├── tracking/                    config model (TrackedProduct, TrackingProperties)
 ├── provider/                    StockProvider interface + StockCheckResult
 │   └── croma/                   CromaStockProvider (calls Croma's inventory API)
-├── notification/                Notifier interface + ConsoleNotifier
+├── notification/                Notifier interface + ConsoleNotifier + shared StockAlertMessage
+│   └── telegram/                TelegramNotifier (calls Telegram Bot API's sendMessage)
 └── service/                     StockCheckService (scheduled orchestration)
 ```
 

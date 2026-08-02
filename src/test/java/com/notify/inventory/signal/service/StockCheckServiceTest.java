@@ -38,7 +38,7 @@ class StockCheckServiceTest {
 		};
 		Notifier recordingNotifier = notified::add;
 
-		StockCheckService service = new StockCheckService(PROPERTIES, List.of(fakeProvider), recordingNotifier);
+		StockCheckService service = new StockCheckService(PROPERTIES, List.of(fakeProvider), List.of(recordingNotifier));
 
 		service.checkAll(); // available=true -> transition, should notify
 		service.checkAll(); // available=true again -> no transition, should NOT notify
@@ -50,9 +50,9 @@ class StockCheckServiceTest {
 
 	@Test
 	void skipsProductsWithNoMatchingProvider() {
-		StockCheckService service = new StockCheckService(PROPERTIES, List.of(), result -> {
+		StockCheckService service = new StockCheckService(PROPERTIES, List.of(), List.of(result -> {
 			throw new AssertionError("notifier should not be called when no provider matches");
-		});
+		}));
 
 		service.checkAll();
 	}
@@ -78,7 +78,7 @@ class StockCheckServiceTest {
 			}
 		};
 
-		StockCheckService service = new StockCheckService(properties, List.of(fakeProvider), result -> { });
+		StockCheckService service = new StockCheckService(properties, List.of(fakeProvider), List.of(result -> { }));
 		service.checkAll();
 
 		assertThat(checkedPincodes).containsExactly("560001", "600001");
@@ -99,7 +99,7 @@ class StockCheckServiceTest {
 			}
 		};
 
-		StockCheckService service = new StockCheckService(PROPERTIES, List.of(throwingProvider), notified::add);
+		StockCheckService service = new StockCheckService(PROPERTIES, List.of(throwingProvider), List.of(notified::add));
 
 		service.checkAll();
 
