@@ -3,11 +3,15 @@ package com.notify.inventory.signal.provider.croma;
 import com.notify.inventory.signal.provider.StockCheckResult;
 import com.notify.inventory.signal.provider.StockProvider;
 import com.notify.inventory.signal.tracking.TrackedProduct;
+import java.net.InetSocketAddress;
+import java.net.ProxySelector;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
@@ -16,10 +20,18 @@ import tools.jackson.databind.ObjectMapper;
 @Component
 public class CromaStockProvider implements StockProvider {
 
+	private static final Logger log = LoggerFactory.getLogger(CromaStockProvider.class);
+
 	private static final String SITE = "croma";
 	private static final String ENDPOINT = "https://api.croma.com/inventory/oms/v2/tms/details-pwa/";
 	private static final String SUBSCRIPTION_KEY =
 			System.getenv().getOrDefault("CROMA_OMS_APIM_KEY", "1131858141634e2abe2efb2b3a2a2a5d");
+	// Croma is behind Akamai bot management, which blocks/challenges known datacenter and
+	// cloud-provider IP ranges (Oracle Cloud, AWS, GCP, etc.) far more aggressively than
+	// residential IPs, independent of request headers. If deployed there, route this call
+	// through a residential/forward proxy via these env vars to work around the IP block.
+	private static final String PROXY_HOST = System.getenv("CROMA_PROXY_HOST");
+	private static final String PROXY_PORT = System.getenv("CROMA_PROXY_PORT");
 
 	// Only itemID and zipCode vary per check; the rest of this shape is fixed by Croma's API.
 	private static final String REQUEST_TEMPLATE = """
@@ -57,10 +69,16 @@ public class CromaStockProvider implements StockProvider {
 			}
 			""";
 
-	private final HttpClient httpClient = HttpClient.newBuilder()
-			.connectTimeout(Duration.ofSeconds(10))
-			.build();
+	private final HttpClient httpClient = buildHttpClient();
 	private final ObjectMapper objectMapper = new ObjectMapper();
+
+	private static HttpClient buildHttpClient() {
+		HttpClient.Builder builder = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10));
+		if (PROXY_HOST != null && !PROXY_HOST.isBlank() && PROXY_PORT != null && !PROXY_PORT.isBlank()) {
+			builder.proxy(ProxySelector.of(new InetSocketAddress(PROXY_HOST, Integer.parseInt(PROXY_PORT))));
+		}
+		return builder.build();
+	}
 
 	@Override
 	public String siteName() {
@@ -74,8 +92,15 @@ public class CromaStockProvider implements StockProvider {
 				.timeout(Duration.ofSeconds(10))
 				.header("Content-Type", "application/json")
 				.header("Accept", "application/json, text/plain, */*")
+				.header("Accept-Language", "en-IN,en-US;q=0.9,en;q=0.8")
+				.header("Origin", "https://www.croma.com")
 				.header("Referer", "https://www.croma.com/")
-				.header("User-Agent", "Mozilla/5.0")
+				.header("Sec-Fetch-Site", "same-site")
+				.header("Sec-Fetch-Mode", "cors")
+				.header("Sec-Fetch-Dest", "empty")
+				.header("User-Agent",
+						"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+								+ "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36")
 				.header("oms-apim-subscription-key", SUBSCRIPTION_KEY)
 				.POST(HttpRequest.BodyPublishers.ofString(REQUEST_TEMPLATE.formatted(product.itemId(), pincode)))
 				.build();
@@ -83,12 +108,24 @@ public class CromaStockProvider implements StockProvider {
 		try {
 			HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 			if (response.statusCode() != 200) {
+				// Likely an Akamai bot-management block on the source IP (common for cloud/
+				// datacenter ASNs such as Oracle Cloud) rather than a malformed request - log
+				// the body so a real auth/shape problem can be told apart from an IP block.
+				log.warn("Croma details-pwa returned HTTP {} for item {} / pincode {}: {}",
+						response.statusCode(), product.itemId(), pincode, truncate(response.body()));
 				return new StockCheckResult(product, pincode, false, "HTTP " + response.statusCode());
 			}
 			return parseAvailability(product, pincode, response.body());
 		} catch (Exception e) {
 			return new StockCheckResult(product, pincode, false, "request failed: " + e.getMessage());
 		}
+	}
+
+	private static String truncate(String body) {
+		if (body == null) {
+			return "";
+		}
+		return body.length() <= 500 ? body : body.substring(0, 500) + "...";
 	}
 
 	// package-private so CromaStockProviderTest can exercise it with saved sample responses
