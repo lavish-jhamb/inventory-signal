@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: inventory-signal
+    runtime: docker
+    plan: free
+    region: oregon
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: BOT_TOKEN
+        sync: false
+      - key: OWNER_CHAT_ID
+        sync: false
