@@ -14,4 +14,5 @@ WORKDIR /app
 COPY --from=build /app/build/libs/*.jar app.jar
 
 # Render injects PORT; server.port already resolves it via ${PORT:8080}
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Cap the heap well inside Render's free-tier 512MB container limit to avoid an OOM-kill
+ENTRYPOINT ["java", "-XX:MaxRAMPercentage=70.0", "-jar", "app.jar"]

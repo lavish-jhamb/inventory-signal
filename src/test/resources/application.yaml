@@ -6,6 +6,12 @@ app:
   scheduler:
     initial-delay-ms: 30000
     fixed-delay-ms: 60000
+    jitter-max-ms: 0
+  connector:
+    request-timeout-seconds: 10
+    rate-limit-delay-ms: 0
+    max-consecutive-fails: 10
+    cooldown-minutes: 30
 
 telegram:
   bot-token: test-token-not-real

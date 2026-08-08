@@ -2,13 +2,14 @@ package com.notify.inventory.signal.provider.croma;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.notify.inventory.signal.provider.ConnectorProperties;
 import com.notify.inventory.signal.provider.StockCheckResult;
 import com.notify.inventory.signal.tracking.TrackedProduct;
 import org.junit.jupiter.api.Test;
 
 class CromaStockProviderTest {
 
-	private final CromaStockProvider provider = new CromaStockProvider();
+	private final CromaStockProvider provider = new CromaStockProvider(new ConnectorProperties(10, 0, 10, 30));
 	private final TrackedProduct product = new TrackedProduct("croma", "317577", "iPhone 17e 512GB Black",
 			"https://www.croma.com/apple-iphone-17e-512gb-black-/p/317577", null);
 

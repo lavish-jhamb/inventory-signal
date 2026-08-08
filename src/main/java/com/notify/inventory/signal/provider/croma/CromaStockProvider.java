@@ -1,5 +1,6 @@
 package com.notify.inventory.signal.provider.croma;
 
+import com.notify.inventory.signal.provider.ConnectorProperties;
 import com.notify.inventory.signal.provider.StockCheckResult;
 import com.notify.inventory.signal.provider.StockProvider;
 import com.notify.inventory.signal.tracking.TrackedProduct;
@@ -69,11 +70,17 @@ public class CromaStockProvider implements StockProvider {
 			}
 			""";
 
-	private final HttpClient httpClient = buildHttpClient();
+	private final ConnectorProperties connectorProperties;
+	private final HttpClient httpClient;
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
-	private static HttpClient buildHttpClient() {
-		HttpClient.Builder builder = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10));
+	public CromaStockProvider(ConnectorProperties connectorProperties) {
+		this.connectorProperties = connectorProperties;
+		this.httpClient = buildHttpClient(connectorProperties.requestTimeout());
+	}
+
+	private static HttpClient buildHttpClient(Duration timeout) {
+		HttpClient.Builder builder = HttpClient.newBuilder().connectTimeout(timeout);
 		if (PROXY_HOST != null && !PROXY_HOST.isBlank() && PROXY_PORT != null && !PROXY_PORT.isBlank()) {
 			builder.proxy(ProxySelector.of(new InetSocketAddress(PROXY_HOST, Integer.parseInt(PROXY_PORT))));
 		}
@@ -89,7 +96,7 @@ public class CromaStockProvider implements StockProvider {
 	public StockCheckResult checkAvailability(TrackedProduct product, String pincode) {
 		HttpRequest request = HttpRequest.newBuilder()
 				.uri(URI.create(ENDPOINT))
-				.timeout(Duration.ofSeconds(10))
+				.timeout(connectorProperties.requestTimeout())
 				.header("Content-Type", "application/json")
 				.header("Accept", "application/json, text/plain, */*")
 				.header("Accept-Language", "en-IN,en-US;q=0.9,en;q=0.8")
@@ -113,11 +120,11 @@ public class CromaStockProvider implements StockProvider {
 				// the body so a real auth/shape problem can be told apart from an IP block.
 				log.warn("Croma details-pwa returned HTTP {} for item {} / pincode {}: {}",
 						response.statusCode(), product.itemId(), pincode, truncate(response.body()));
-				return new StockCheckResult(product, pincode, false, "HTTP " + response.statusCode());
+				return new StockCheckResult(product, pincode, false, "HTTP " + response.statusCode(), true);
 			}
 			return parseAvailability(product, pincode, response.body());
 		} catch (Exception e) {
-			return new StockCheckResult(product, pincode, false, "request failed: " + e.getMessage());
+			return new StockCheckResult(product, pincode, false, "request failed: " + e.getMessage(), true);
 		}
 	}
 
@@ -136,7 +143,7 @@ public class CromaStockProvider implements StockProvider {
 		JsonNode unavailableLines = suggestedOption.path("unavailableLines").path("unavailableLine");
 		if (unavailableLines.isArray() && !unavailableLines.isEmpty()) {
 			String reason = unavailableLines.get(0).path("unavailableReason").asString("unknown reason");
-			return new StockCheckResult(product, pincode, false, reason);
+			return new StockCheckResult(product, pincode, false, reason, false);
 		}
 
 		JsonNode promiseLines = suggestedOption.path("option").path("promiseLines").path("promiseLine");
@@ -145,9 +152,10 @@ public class CromaStockProvider implements StockProvider {
 			String carrier = line.path("carrierServiceCode").asString("");
 			JsonNode assignment = line.path("assignments").path("assignment").path(0);
 			String deliveryDate = assignment.path("deliveryDate").asString("");
-			return new StockCheckResult(product, pincode, true, "deliverable via %s, by %s".formatted(carrier, deliveryDate));
+			return new StockCheckResult(product, pincode, true, "deliverable via %s, by %s".formatted(carrier, deliveryDate), false);
 		}
 
-		return new StockCheckResult(product, pincode, false, "unrecognized response shape");
+		// unexpected shape (e.g. a bot-challenge page returned with HTTP 200) - flag as an error, not a real "out of stock"
+		return new StockCheckResult(product, pincode, false, "unrecognized response shape", true);
 	}
 }
