@@ -3,16 +3,15 @@
 app:
   tracking:
     pincodes:
-      - "400049"
-      - "110001"
+      - "125050"
 
     products:
       - site: croma
-        itemId: "317577"
-        name: "iPhone 17e 512GB Black"
-        url: "https://www.croma.com/apple-iphone-17e-512gb-black-/p/317577"
+        itemId: "300652"
+        name: "Apple iPhone 15 (128GB, Black)"
+        url: "https://www.croma.com/apple-iphone-15-128gb-black-/p/300652"
 
       - site: croma
-        itemId: "317415"
-        name: "iPhone 17 Pro 256GB Silver"
-        url: "https://www.croma.com/apple-iphone-17-pro-256gb-silver-/p/317415"
+        itemId: "309621"
+        name: "Apple iPhone 16 (128GB, Black)"
+        url: "https://www.croma.com/apple-iphone-16-128gb-black-/p/309621"
