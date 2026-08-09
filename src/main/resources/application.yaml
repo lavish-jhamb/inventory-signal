@@ -22,6 +22,12 @@ app:
     rate-limit-delay-ms: 8000 # pause between each product/pincode check within a cycle, avoids bursty requests
     max-consecutive-fails: 10 # trip the circuit breaker after this many failures in a row for the same product/pincode
     cooldown-minutes: 30 # how long a tripped circuit breaker stays open before retrying
+  catalog:
+    enabled: true
+    repo-owner: lavish-jhamb
+    repo-name: inventory-signal
+    branch: main
+    path: src/main/resources/products.yaml
 
 management:
   endpoints:

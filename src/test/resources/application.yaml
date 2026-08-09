@@ -12,6 +12,12 @@ app:
     rate-limit-delay-ms: 0
     max-consecutive-fails: 10
     cooldown-minutes: 30
+  catalog:
+    enabled: false # never hit the network in tests - TrackingCatalogService.refresh() becomes a no-op
+    repo-owner: test
+    repo-name: test
+    branch: main
+    path: products.yaml
 
 telegram:
   bot-token: test-token-not-real

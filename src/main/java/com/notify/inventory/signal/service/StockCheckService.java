@@ -5,6 +5,7 @@ import com.notify.inventory.signal.provider.ConnectorProperties;
 import com.notify.inventory.signal.provider.StockCheckResult;
 import com.notify.inventory.signal.provider.StockProvider;
 import com.notify.inventory.signal.tracking.TrackedProduct;
+import com.notify.inventory.signal.tracking.TrackingCatalogService;
 import com.notify.inventory.signal.tracking.TrackingProperties;
 import java.time.Instant;
 import java.util.List;
@@ -23,7 +24,7 @@ public class StockCheckService {
 
 	private static final Logger log = LoggerFactory.getLogger(StockCheckService.class);
 
-	private final TrackingProperties trackingProperties;
+	private final TrackingCatalogService trackingCatalogService;
 	private final SchedulerProperties schedulerProperties;
 	private final ConnectorProperties connectorProperties;
 	private final Map<String, StockProvider> providersBySite;
@@ -35,9 +36,9 @@ public class StockCheckService {
 	private final Map<String, Integer> consecutiveFails = new ConcurrentHashMap<>();
 	private final Map<String, Instant> cooldownUntil = new ConcurrentHashMap<>();
 
-	public StockCheckService(TrackingProperties trackingProperties, SchedulerProperties schedulerProperties,
+	public StockCheckService(TrackingCatalogService trackingCatalogService, SchedulerProperties schedulerProperties,
 			ConnectorProperties connectorProperties, List<StockProvider> providers, List<Notifier> notifiers) {
-		this.trackingProperties = trackingProperties;
+		this.trackingCatalogService = trackingCatalogService;
 		this.schedulerProperties = schedulerProperties;
 		this.connectorProperties = connectorProperties;
 		this.providersBySite = providers.stream().collect(Collectors.toMap(StockProvider::siteName, p -> p));
@@ -50,6 +51,9 @@ public class StockCheckService {
 		if (!sleepQuietly(ThreadLocalRandom.current().nextLong(schedulerProperties.jitterMaxMs() + 1))) {
 			return;
 		}
+
+		trackingCatalogService.refresh();
+		TrackingProperties trackingProperties = trackingCatalogService.current();
 
 		boolean first = true;
 		for (TrackedProduct product : trackingProperties.products()) {

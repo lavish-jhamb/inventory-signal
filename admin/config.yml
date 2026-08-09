@@ -1,0 +1,43 @@
+backend:
+  name: git-gateway
+  branch: main
+
+# No images/uploads used by this collection, but Decap CMS requires the field.
+media_folder: ""
+
+collections:
+  - name: "tracking"
+    label: "Product Tracking"
+    files:
+      - name: "products"
+        label: "Tracked Products"
+        file: "src/main/resources/products.yaml"
+        fields:
+          - label: "App"
+            name: "app"
+            widget: "object"
+            fields:
+              - label: "Tracking"
+                name: "tracking"
+                widget: "object"
+                fields:
+                  - label: "Default Pincodes"
+                    name: "pincodes"
+                    widget: "list"
+                  - label: "Products"
+                    name: "products"
+                    widget: "list"
+                    summary: "{{fields.name}} ({{fields.itemId}})"
+                    fields:
+                      - label: "Site"
+                        name: "site"
+                        widget: "select"
+                        options: ["croma"]
+                        default: "croma"
+                      - {label: "Item ID", name: "itemId", widget: "string"}
+                      - {label: "Name", name: "name", widget: "string"}
+                      - {label: "Product URL", name: "url", widget: "string"}
+                      - label: "Pincode Overrides (optional)"
+                        name: "pincodes"
+                        widget: "list"
+                        required: false

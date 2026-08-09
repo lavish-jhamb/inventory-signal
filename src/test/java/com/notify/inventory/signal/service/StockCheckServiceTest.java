@@ -6,7 +6,9 @@ import com.notify.inventory.signal.notification.Notifier;
 import com.notify.inventory.signal.provider.ConnectorProperties;
 import com.notify.inventory.signal.provider.StockCheckResult;
 import com.notify.inventory.signal.provider.StockProvider;
+import com.notify.inventory.signal.tracking.CatalogProperties;
 import com.notify.inventory.signal.tracking.TrackedProduct;
+import com.notify.inventory.signal.tracking.TrackingCatalogService;
 import com.notify.inventory.signal.tracking.TrackingProperties;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -20,6 +22,8 @@ class StockCheckServiceTest {
 			new TrackedProduct("croma", "317577", "iPhone 17e", "https://www.croma.com/apple-iphone-17e-512gb-black-/p/317577", null);
 	private static final TrackingProperties PROPERTIES =
 			new TrackingProperties(List.of("400049"), List.of(PRODUCT));
+	// disabled so refresh() is a no-op and tests never hit the network
+	private static final CatalogProperties CATALOG_PROPERTIES = new CatalogProperties(false, "test", "test", "main", "products.yaml");
 	// zero jitter/delay so tests run instantly and deterministically
 	private static final SchedulerProperties SCHEDULER_PROPERTIES = new SchedulerProperties(0);
 	private static final ConnectorProperties CONNECTOR_PROPERTIES = new ConnectorProperties(10, 0, 10, 30);
@@ -43,7 +47,7 @@ class StockCheckServiceTest {
 		Notifier recordingNotifier = notified::add;
 
 		StockCheckService service = new StockCheckService(
-				PROPERTIES, SCHEDULER_PROPERTIES, CONNECTOR_PROPERTIES, List.of(fakeProvider), List.of(recordingNotifier));
+				new TrackingCatalogService(PROPERTIES, CATALOG_PROPERTIES), SCHEDULER_PROPERTIES, CONNECTOR_PROPERTIES, List.of(fakeProvider), List.of(recordingNotifier));
 
 		service.checkAll(); // available=true -> transition, should notify
 		service.checkAll(); // available=true again -> no transition, should NOT notify
@@ -55,7 +59,8 @@ class StockCheckServiceTest {
 
 	@Test
 	void skipsProductsWithNoMatchingProvider() {
-		StockCheckService service = new StockCheckService(PROPERTIES, SCHEDULER_PROPERTIES, CONNECTOR_PROPERTIES, List.of(), List.of(result -> {
+		StockCheckService service = new StockCheckService(
+				new TrackingCatalogService(PROPERTIES, CATALOG_PROPERTIES), SCHEDULER_PROPERTIES, CONNECTOR_PROPERTIES, List.of(), List.of(result -> {
 			throw new AssertionError("notifier should not be called when no provider matches");
 		}));
 
@@ -84,7 +89,7 @@ class StockCheckServiceTest {
 		};
 
 		StockCheckService service = new StockCheckService(
-				properties, SCHEDULER_PROPERTIES, CONNECTOR_PROPERTIES, List.of(fakeProvider), List.of(result -> { }));
+				new TrackingCatalogService(properties, CATALOG_PROPERTIES), SCHEDULER_PROPERTIES, CONNECTOR_PROPERTIES, List.of(fakeProvider), List.of(result -> { }));
 		service.checkAll();
 
 		assertThat(checkedPincodes).containsExactly("560001", "600001");
@@ -106,7 +111,7 @@ class StockCheckServiceTest {
 		};
 
 		StockCheckService service = new StockCheckService(
-				PROPERTIES, SCHEDULER_PROPERTIES, CONNECTOR_PROPERTIES, List.of(throwingProvider), List.of(notified::add));
+				new TrackingCatalogService(PROPERTIES, CATALOG_PROPERTIES), SCHEDULER_PROPERTIES, CONNECTOR_PROPERTIES, List.of(throwingProvider), List.of(notified::add));
 
 		service.checkAll();
 
