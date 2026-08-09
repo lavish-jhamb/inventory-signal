@@ -16,10 +16,12 @@ collections:
           - label: "App"
             name: "app"
             widget: "object"
+            collapsed: true
             fields:
               - label: "Tracking"
                 name: "tracking"
                 widget: "object"
+                collapsed: true
                 fields:
                   - label: "Default Pincodes"
                     name: "pincodes"
