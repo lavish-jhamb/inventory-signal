@@ -6,6 +6,13 @@ services:
     region: oregon
     healthCheckPath: /actuator/health
     buildFilter:
+      paths:
+        - Dockerfile
+        - build.gradle.kts
+        - settings.gradle.kts
+        - gradlew
+        - gradle/**
+        - src/main/**
       ignoredPaths:
         - src/main/resources/products.yaml # editing tracked products/pincodes shouldn't trigger a rebuild
     envVars:
