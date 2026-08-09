@@ -4,8 +4,6 @@ import com.notify.inventory.signal.provider.ConnectorProperties;
 import com.notify.inventory.signal.provider.StockCheckResult;
 import com.notify.inventory.signal.provider.StockProvider;
 import com.notify.inventory.signal.tracking.TrackedProduct;
-import java.net.InetSocketAddress;
-import java.net.ProxySelector;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -27,12 +25,6 @@ public class CromaStockProvider implements StockProvider {
 	private static final String ENDPOINT = "https://api.croma.com/inventory/oms/v2/tms/details-pwa/";
 	private static final String SUBSCRIPTION_KEY =
 			System.getenv().getOrDefault("CROMA_OMS_APIM_KEY", "1131858141634e2abe2efb2b3a2a2a5d");
-	// Croma is behind Akamai bot management, which blocks/challenges known datacenter and
-	// cloud-provider IP ranges (Oracle Cloud, AWS, GCP, etc.) far more aggressively than
-	// residential IPs, independent of request headers. If deployed there, route this call
-	// through a residential/forward proxy via these env vars to work around the IP block.
-	private static final String PROXY_HOST = System.getenv("CROMA_PROXY_HOST");
-	private static final String PROXY_PORT = System.getenv("CROMA_PROXY_PORT");
 
 	// Only itemID and zipCode vary per check; the rest of this shape is fixed by Croma's API.
 	private static final String REQUEST_TEMPLATE = """
@@ -80,11 +72,7 @@ public class CromaStockProvider implements StockProvider {
 	}
 
 	private static HttpClient buildHttpClient(Duration timeout) {
-		HttpClient.Builder builder = HttpClient.newBuilder().connectTimeout(timeout);
-		if (PROXY_HOST != null && !PROXY_HOST.isBlank() && PROXY_PORT != null && !PROXY_PORT.isBlank()) {
-			builder.proxy(ProxySelector.of(new InetSocketAddress(PROXY_HOST, Integer.parseInt(PROXY_PORT))));
-		}
-		return builder.build();
+		return HttpClient.newBuilder().connectTimeout(timeout).build();
 	}
 
 	@Override

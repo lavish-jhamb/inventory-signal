@@ -21,7 +21,7 @@ class StockCheckServiceTest {
 	private static final TrackingProperties PROPERTIES =
 			new TrackingProperties(List.of("400049"), List.of(PRODUCT));
 	// zero jitter/delay so tests run instantly and deterministically
-	private static final SchedulerProperties SCHEDULER_PROPERTIES = new SchedulerProperties(0, 0, 0);
+	private static final SchedulerProperties SCHEDULER_PROPERTIES = new SchedulerProperties(0);
 	private static final ConnectorProperties CONNECTOR_PROPERTIES = new ConnectorProperties(10, 0, 10, 30);
 
 	@Test

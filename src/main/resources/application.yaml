@@ -10,7 +10,6 @@ spring:
 telegram:
   bot-token: ${BOT_TOKEN}
   owner-chat-id: ${OWNER_CHAT_ID}
-  polling-timeout-seconds: 30
   api-base-url: https://api.telegram.org
 
 app:
@@ -40,3 +39,9 @@ server:
   tomcat:
     threads:
       max: 20 # near-zero real inbound traffic here (just health-check pings) - shrink default 200-thread pool to save memory under Render's 512MB cap
+
+logging:
+  level:
+    sun.rmi: WARN
+    javax.management.remote.rmi: WARN
+    com.notify.inventory.signal: DEBUG

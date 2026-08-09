@@ -2,6 +2,7 @@ package com.notify.inventory.signal.notification.telegram;
 
 import com.notify.inventory.signal.notification.Notifier;
 import com.notify.inventory.signal.notification.StockAlertMessage;
+import com.notify.inventory.signal.provider.ConnectorProperties;
 import com.notify.inventory.signal.provider.StockCheckResult;
 import java.net.URI;
 import java.net.URLEncoder;
@@ -9,7 +10,6 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -21,12 +21,13 @@ public class TelegramNotifier implements Notifier {
 	private static final Logger log = LoggerFactory.getLogger(TelegramNotifier.class);
 
 	private final TelegramProperties properties;
-	private final HttpClient httpClient = HttpClient.newBuilder()
-			.connectTimeout(Duration.ofSeconds(10))
-			.build();
+	private final ConnectorProperties connectorProperties;
+	private final HttpClient httpClient;
 
-	public TelegramNotifier(TelegramProperties properties) {
+	public TelegramNotifier(TelegramProperties properties, ConnectorProperties connectorProperties) {
 		this.properties = properties;
+		this.connectorProperties = connectorProperties;
+		this.httpClient = HttpClient.newBuilder().connectTimeout(connectorProperties.requestTimeout()).build();
 	}
 
 	@Override
@@ -36,7 +37,7 @@ public class TelegramNotifier implements Notifier {
 
 		HttpRequest request = HttpRequest.newBuilder()
 				.uri(URI.create(url))
-				.timeout(Duration.ofSeconds(10))
+				.timeout(connectorProperties.requestTimeout())
 				.header("Content-Type", "application/x-www-form-urlencoded")
 				.POST(HttpRequest.BodyPublishers.ofString(body))
 				.build();
