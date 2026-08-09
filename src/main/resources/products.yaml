@@ -1,17 +1,17 @@
-# Products to track and pincodes to check them against.
-# Per-product "pincodes" is optional - omit it to use the global list below.
 app:
   tracking:
     pincodes:
       - "125050"
-
     products:
       - site: croma
         itemId: "300652"
-        name: "Apple iPhone 15 (128GB, Black)"
-        url: "https://www.croma.com/apple-iphone-15-128gb-black-/p/300652"
-
+        name: Apple iPhone 15 (128GB, Black)
+        url: https://www.croma.com/apple-iphone-15-128gb-black-/p/300652
       - site: croma
         itemId: "309621"
-        name: "Apple iPhone 16 (128GB, Black)"
-        url: "https://www.croma.com/apple-iphone-16-128gb-black-/p/309621"
+        name: Apple iPhone 16 (128GB, Black)
+        url: https://www.croma.com/apple-iphone-16-128gb-black-/p/309621
+      - site: croma
+        name: Apple iPhone 15 (256GB, Pink)
+        url: https://www.croma.com/apple-iphone-15-256gb-pink-/p/300722
+        itemId: "300722"
