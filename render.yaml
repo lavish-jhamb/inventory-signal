@@ -5,6 +5,9 @@ services:
     plan: free
     region: oregon
     healthCheckPath: /actuator/health
+    buildFilter:
+      ignoredPaths:
+        - src/main/resources/products.yaml # editing tracked products/pincodes shouldn't trigger a rebuild
     envVars:
       - key: BOT_TOKEN
         sync: false
