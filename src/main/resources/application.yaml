@@ -39,9 +39,3 @@ server:
   tomcat:
     threads:
       max: 20 # near-zero real inbound traffic here (just health-check pings) - shrink default 200-thread pool to save memory under Render's 512MB cap
-
-logging:
-  level:
-    sun.rmi: WARN
-    javax.management.remote.rmi: WARN
-    com.notify.inventory.signal: DEBUG
