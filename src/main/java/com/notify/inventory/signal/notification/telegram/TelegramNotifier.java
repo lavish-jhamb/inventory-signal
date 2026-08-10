@@ -33,7 +33,7 @@ public class TelegramNotifier implements Notifier {
 	@Override
 	public void notify(StockCheckResult result) {
 		String url = properties.apiBaseUrl() + "/bot" + properties.botToken() + "/sendMessage";
-		String body = formBody(properties.ownerChatId(), StockAlertMessage.format(result));
+		String body = formBody(properties.ownerChatId(), StockAlertMessage.format(result), result.product().url());
 
 		HttpRequest request = HttpRequest.newBuilder()
 				.uri(URI.create(url))
@@ -53,10 +53,19 @@ public class TelegramNotifier implements Notifier {
 	}
 
 	// package-private so TelegramNotifierTest can assert the request shape without a real HTTP call
-	String formBody(String chatId, String message) {
+	String formBody(String chatId, String message, String buyUrl) {
 		return "chat_id=" + encode(chatId)
 				+ "&text=" + encode(message)
-				+ "&disable_web_page_preview=true";
+				+ "&reply_markup=" + encode(buyNowKeyboard(buyUrl));
+	}
+
+	// omits disable_web_page_preview so Telegram auto-generates the product's link-preview card (image/title) from its og: tags
+	private String buyNowKeyboard(String buyUrl) {
+		return "{\"inline_keyboard\":[[{\"text\":\"\uD83D\uDED2 BUY NOW \u2014 CLICK HERE\",\"url\":\"" + escapeJson(buyUrl) + "\"}]]}";
+	}
+
+	private String escapeJson(String value) {
+		return value.replace("\\", "\\\\").replace("\"", "\\\"");
 	}
 
 	private String encode(String value) {

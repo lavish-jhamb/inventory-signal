@@ -15,7 +15,7 @@ class TrackingPropertiesTest {
 	@Test
 	void loadsPincodesAndProductsFromProductsYaml() {
 		assertThat(trackingProperties.pincodes()).containsExactly("125050");
-		assertThat(trackingProperties.products()).hasSize(2);
+		assertThat(trackingProperties.products()).hasSize(3);
 
 		TrackedProduct iphone15 = trackingProperties.products().get(0);
 		assertThat(iphone15.site()).isEqualTo("croma");

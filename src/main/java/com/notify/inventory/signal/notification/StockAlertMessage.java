@@ -11,11 +11,13 @@ public final class StockAlertMessage {
 
 	public static String format(StockCheckResult result) {
 		TrackedProduct product = result.product();
-		String siteLabel = product.site().substring(0, 1).toUpperCase() + product.site().substring(1);
+		String siteLabel = product.site().toUpperCase();
 
 		return """
-				🚨 %s Stock ALERT
-				📱 Product : %s
+				🚨 %s STOCK ALERT 🚀
+
+				📦 %s
+				✅ Status  : IN STOCK
 				📍 Pincode : %s
 				🛒 Buy now : %s""".formatted(siteLabel, product.name(), result.pincode(), product.url());
 	}
