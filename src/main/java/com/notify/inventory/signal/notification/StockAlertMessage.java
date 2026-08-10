@@ -14,9 +14,9 @@ public final class StockAlertMessage {
 		String siteLabel = product.site().substring(0, 1).toUpperCase() + product.site().substring(1);
 
 		return """
-				%s Stock ALERT
-				Product : %s
-				Pincode : %s
-				Buy now : %s""".formatted(siteLabel, product.name(), result.pincode(), product.url());
+				🚨 %s Stock ALERT
+				📱 Product : %s
+				📍 Pincode : %s
+				🛒 Buy now : %s""".formatted(siteLabel, product.name(), result.pincode(), product.url());
 	}
 }
