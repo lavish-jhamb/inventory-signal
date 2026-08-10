@@ -1,0 +1,20 @@
+app:
+  scheduler:
+    initial-delay-ms: 5000 # start checking almost immediately for fast local iteration
+    fixed-delay-ms: 30000
+    jitter-max-ms: 0 # deterministic timing while testing locally
+  connector:
+    request-timeout-seconds: 10
+    rate-limit-delay-ms: 0 # no need to space out requests against a small local product list
+    max-consecutive-fails: 10
+    cooldown-minutes: 30
+  catalog:
+    enabled: false # use the classpath-bundled products.yaml as-is, don't let a GitHub fetch overwrite local edits
+    repo-owner: lavish-jhamb
+    repo-name: inventory-signal
+    branch: main
+    path: src/main/resources/products.yaml
+
+logging:
+  level:
+    com.notify.inventory.signal: DEBUG

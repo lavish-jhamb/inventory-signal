@@ -2,6 +2,9 @@ spring:
   application:
     name: inventory-signal
 
+  profiles:
+    active: local # local dev default when no profile is set; Render overrides via SPRING_PROFILES_ACTIVE=prod
+
   config:
     import:
       - optional:file:.env[.properties]
@@ -11,23 +14,6 @@ telegram:
   bot-token: ${BOT_TOKEN}
   owner-chat-id: ${OWNER_CHAT_ID}
   api-base-url: https://api.telegram.org
-
-app:
-  scheduler:
-    initial-delay-ms: 30000
-    fixed-delay-ms: 300000 # base cycle interval (5 min) - was 60s, far too frequent for Render's free tier / anti-bot risk
-    jitter-max-ms: 60000 # random extra delay (0-1 min) added each cycle so requests aren't perfectly periodic
-  connector:
-    request-timeout-seconds: 10
-    rate-limit-delay-ms: 8000 # pause between each product/pincode check within a cycle, avoids bursty requests
-    max-consecutive-fails: 10 # trip the circuit breaker after this many failures in a row for the same product/pincode
-    cooldown-minutes: 30 # how long a tripped circuit breaker stays open before retrying
-  catalog:
-    enabled: true
-    repo-owner: lavish-jhamb
-    repo-name: inventory-signal
-    branch: main
-    path: src/main/resources/products.yaml
 
 management:
   endpoints:
@@ -42,6 +28,3 @@ management:
 
 server:
   port: ${PORT:8080}
-  tomcat:
-    threads:
-      max: 20 # near-zero real inbound traffic here (just health-check pings) - shrink default 200-thread pool to save memory under Render's 512MB cap
