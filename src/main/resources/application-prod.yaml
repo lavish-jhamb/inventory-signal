@@ -1,7 +1,7 @@
 app:
   scheduler:
     initial-delay-ms: 30000
-    fixed-delay-ms: 30000 # base cycle interval - was 60s, far too frequent for Render's free tier / anti-bot risk
+    fixed-delay-ms: 300000 # base cycle interval - was 60s, far too frequent for Render's free tier / anti-bot risk
     jitter-max-ms: 60000 # random extra delay (0-1 min) added each cycle so requests aren't perfectly periodic
   connector:
     request-timeout-seconds: 10
